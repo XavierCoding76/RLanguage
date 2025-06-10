@@ -1,0 +1,177 @@
+# Seeks for the dplyr module, and installs it to allow to code to run it, if needed.
+library(dplyr)
+
+# Declaration of variables in R
+a <- 5
+b <- 6
+
+# The c represents binding elements together. (Concatenate)
+# - Reminder: It has to be the same data type.
+ages <- c(a, b, 8)
+
+# Total up the integers in a numeric vector (Array)
+# - Reminder: Only usable to integers.
+sum(ages)
+# - Reminder: You can also use it for a single row in a table.
+# This row of code means linked table's ages column.
+# sum(linked$ages)
+
+# Print function basically do print, yeah, just print.
+# - Reminder: Quite boring.
+names <- c("John", "Chris", "Nigga")
+print(names)
+
+# Data.frame links data that is under a specific variable, which has the same relative location in an array.
+linked <- data.frame(names, ages)
+
+# View the linked data in a table.
+View(linked)
+
+# Quick overview of the data
+glimpse(linked)
+
+# Views the first 6 rows of data.
+# - Reminder: The number of data to be seen can be adjusted by adding a number behind the dataset name.
+head(StudentList)
+
+# Specifies the datatype of a variable in a dataset.
+class(linked$age)
+
+# Typically views how many variables are in a dataset.
+length(linked)
+
+# Shows all the names of variables in a dataset.
+names(linked)
+
+# Specifies all the unique data in a dataset.
+unique(linked$age)
+
+missing <- !complete.cases(linked)
+linked[missing, ]
+
+# View the details of the linked data in a table.
+str(linked)
+
+# Prints the data that stays in that location, depending on the specified row or column.
+# Shows the data that sits in the first row, first column.
+linked[1,1]
+# Typically shows the variables of the whole table. 
+linked[1, ]
+# Shows the first row of data.
+linked[, 1]
+
+# The data() function is used to load datasets that are stored in a specific way within R or within an R package.
+# - Reminder: If no datasets were inserted in the parameter list, the system will popup a R datasets, in which states the datasets reserved.
+Data()
+
+# Example of creating a dataset.
+
+StudentList <- data.frame(
+  ID = 1:100,
+  Name = paste0("Name", 1:100),
+  Age = sample(18:60, 100, replace = TRUE),
+  Score = round(runif(100, 0, 100), 1),
+  Passed = sample(c(TRUE, FALSE), 100, replace = TRUE),
+  Group = factor(sample(c("A", "B", "C"), 100, replace = TRUE)),
+  DateJoined = sample(seq(as.Date('2020-01-01'), as.Date('2023-01-01'), by="day"), 100)
+)
+
+# Note: Directly typing the name will print the whole dataset.
+StudentList
+
+# Example of a conditional search
+# - Reminder: Requires dplyr module to be loaded.
+# library(dplyr)
+View(starwars)
+
+# %>% (Pipe operator) connects the command that will be running next.
+starwars %>% 
+
+# filter filters the data based on the requirements given.
+filter(height > 150) %>% 
+
+# Mutate changes the data format desired.
+mutate(height_in_meters = height/100) %>% 
+
+# Select selects the data rows that will be shown.
+select(height_in_meters, mass) %>% 
+
+# Arrange orders the data rows based on the desired variable.
+# - Reminder: If doing it in descending order, do as such: arrange(desc(mass))
+arrange(mass) %>% 
+
+# Plots the graph based on what was selected before.
+# - Reminder: It has to be connected with pipe operator to view the plot.
+plot()
+
+# Example of printing data row with missing variables.
+customer_data <- data.frame(
+  CustomerID = c(101, 102, 103, 104, 105),
+  Name = c("Alice", "Bob", NA, "David", "Eve"), # NA in row 3
+  Age = c(28, 35, 42, NA, 30), # NA in row 4
+  # The 'Products' column is a list, but we'll ignore it for this simple check
+  Products = I(list(
+    c("Shirt", "Pants"),
+    "Laptop",
+    c("Book", "Pen", "Bag"),
+    list(),
+    "Keyboard"
+  )),
+  stringsAsFactors = FALSE
+)
+
+missing_flags <- !complete.cases(customer_data[, c("CustomerID", "Name", "Age")])
+
+# ------------------------------------------------------------------------------------------------------------------------------
+# Example of selecting data in R.
+# These two codes do the same.
+
+starwars %>%
+select("name", "height", "mass")
+
+# This selects the data by selecting the variable continously.
+starwars %>% 
+select(1:3)
+
+# If you want to specific which column to select, do this instead.
+starwars %>%
+  select(c(1, 3)) %>% # Selects column 1 (name) and column 3 (mass)
+  head()
+
+# This filters the variables that fulfil the requirement, through using helper functions.
+starwars %>%
+select(ends_with("color")) %>%
+view()
+
+# You can also mix continous and non-continous columns
+starwars %>%
+  select(c(1:3, 5, 8)) %>% # Selects 1,2,3, then 5, then 8
+  head()
+
+# Changing variable order.
+starwars %>%
+select(name, mass, height, everything()) 
+
+# Changing variable name
+starwars %>%
+rename("characters" = "name") %>%
+head()
+
+# Changing variable type
+# Step 1: Change the type
+class(starwars$hair_color)
+starwars$hair_color <- as.factor(starwars$hair_color)
+class(starwars$hair_color)
+
+# Step 2: Change the data
+starwars %>%
+mutate(hair_color = as.character(hair.color)) %>%
+glimpse()
+
+
+# End of selecting examples.
+# ------------------------------------------------------------------------------------------------------------------------------
+
+# Changing factor levels
+df <- starwars
+df$sex <- as.factor(df$sex)
