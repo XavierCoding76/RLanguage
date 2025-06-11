@@ -1,5 +1,9 @@
 # Seeks for the dplyr module, and installs it to allow to code to run it, if needed.
 library(dplyr)
+# Seeks for the tidyr module.
+library(tidyr)
+# Seeks for the ggplot2 module.
+library(ggplot2)
 
 # Declaration of variables in R
 a <- 5
@@ -62,7 +66,7 @@ linked[, 1]
 
 # The data() function is used to load datasets that are stored in a specific way within R or within an R package.
 # - Reminder: If no datasets were inserted in the parameter list, the system will popup a R datasets, in which states the datasets reserved.
-Data()
+data()
 
 # Example of creating a dataset.
 
@@ -79,31 +83,36 @@ StudentList <- data.frame(
 # Note: Directly typing the name will print the whole dataset.
 StudentList
 
-# Example of a conditional search
+# ------------------------------------------------------------------------------------------------------------------------------
+# Example of a conditional search and modifying data.
 # - Reminder: Requires dplyr module to be loaded.
 # library(dplyr)
-View(starwars)
 
 # %>% (Pipe operator) connects the command that will be running next.
 starwars %>% 
-
+  
 # filter filters the data based on the requirements given.
 filter(height > 150) %>% 
-
+  
 # Mutate changes the data format desired.
 mutate(height_in_meters = height/100) %>% 
+  
 
 # Select selects the data rows that will be shown.
 select(height_in_meters, mass) %>% 
+  
+  # Arrange orders the data rows based on the desired variable.
+  # - Reminder: If doing it in descending order, do as such: arrange(desc(mass))
+  arrange(mass) %>% 
+  
+  # Plots the graph based on what was selected before.
+  # - Reminder: It has to be connected with pipe operator to view the plot.
+  plot()
 
-# Arrange orders the data rows based on the desired variable.
-# - Reminder: If doing it in descending order, do as such: arrange(desc(mass))
-arrange(mass) %>% 
+# End of a conditional search.
+# ------------------------------------------------------------------------------------------------------------------------------
 
-# Plots the graph based on what was selected before.
-# - Reminder: It has to be connected with pipe operator to view the plot.
-plot()
-
+# ------------------------------------------------------------------------------------------------------------------------------
 # Example of printing data row with missing variables.
 customer_data <- data.frame(
   CustomerID = c(101, 102, 103, 104, 105),
@@ -121,17 +130,20 @@ customer_data <- data.frame(
 )
 
 missing_flags <- !complete.cases(customer_data[, c("CustomerID", "Name", "Age")])
+# CODE MISSING! CODE MISSING! CODE MISSING! CODE MISSING! CODE MISSING! CODE MISSING! CODE MISSING! CODE MISSING!  CODE MISSING! CODE MISSING! 
+# End of printing data row with missing variables.
+# ------------------------------------------------------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------------------------------------------------------
 # Example of selecting data in R.
 # These two codes do the same.
 
 starwars %>%
-select("name", "height", "mass")
+  select("name", "height", "mass")
 
 # This selects the data by selecting the variable continously.
 starwars %>% 
-select(1:3)
+  select(1:3)
 
 # If you want to specific which column to select, do this instead.
 starwars %>%
@@ -140,8 +152,8 @@ starwars %>%
 
 # This filters the variables that fulfil the requirement, through using helper functions.
 starwars %>%
-select(ends_with("color")) %>%
-view()
+  select(ends_with("color")) %>%
+  View()
 
 # You can also mix continous and non-continous columns
 starwars %>%
@@ -150,12 +162,12 @@ starwars %>%
 
 # Changing variable order.
 starwars %>%
-select(name, mass, height, everything()) 
+  select(name, mass, height, everything()) 
 
 # Changing variable name
 starwars %>%
-rename("characters" = "name") %>%
-head()
+  rename("characters" = "name") %>%
+  head()
 
 # Changing variable type
 # Step 1: Change the type
@@ -165,13 +177,128 @@ class(starwars$hair_color)
 
 # Step 2: Change the data
 starwars %>%
-mutate(hair_color = as.character(hair.color)) %>%
-glimpse()
+  mutate(hair_color = as.character(hair_color)) %>%
+  glimpse()
 
 
 # End of selecting examples.
 # ------------------------------------------------------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------------------------------------------------------
 # Changing factor levels
+
+# Sets a temporary list to dataset, which can prevent unwanted changes toward the original dataset.
 df <- starwars
+
+# Sets the variable into factor from anything else.
 df$sex <- as.factor(df$sex)
+
+df <- df %>%
+  mutate(sex = factor(sex, levels = c("male", "female", "hermaphroditic", "none")))
+
+# This line of code shows all the factors in the variable.
+levels(df$sex)
+
+# End of changing factor levels
+# ------------------------------------------------------------------------------------------------------------------------------
+
+# Recode data
+starwars %>%
+  select(sex) %>%
+  mutate(sex = recode(sex, "male" = "alpha male", "female" = "alpha female"))
+
+# Dealing with missing data
+# - Reminder: This is an numeric example.
+mean(starwars$height, na.rm = TRUE)
+
+# Drops row that has NA on specified variable.
+starwars %>% 
+  drop_na(hair_color)
+
+# Dealing with duplicates 
+# - Reminder: It removes data in dataset which has exact same value for all variables.
+example_name <- c("Nigga", "John", "Nigga", "Ching Chong")
+example_age <- c(22, 33, 22, 44)
+
+example_friends <- data.frame(example_name, example_age)
+
+example_friends
+
+example_friends %>%
+  distinct()
+
+distinct(example_friends)
+
+################################################################################
+# Manipulate
+
+# Create or change a variable (mutate)
+starwars %>%
+mutate(height_m = height/100) %>%
+select(name, height, height_m)
+
+# Conditional change (using if-else)
+starwars %>%
+  mutate(height_m = height/100) %>%
+  select(name, height, height_m) %>%
+  mutate(tallness = if_else(height_m < 1, "short", "tall"))
+
+# -----------------------------------------------------------------------------
+# Reshape data with Pivot wider.
+
+# Makes data easier to be viewed, as it'll be grouped row by rows based on the year.
+library(gapminder)
+View(gapminder)
+
+gapminder_data <- select(gapminder, country, year, lifeExp)
+View(gapminder_data)
+
+wide_data <- gapminder_data %>%
+  pivot_wider(names_from = year, values_from = lifeExp)
+
+View(wide_data)
+
+# Data grouped columns by columns based on the year.
+long_data <- wide_data %>%
+  pivot_longer(2:13, names_to = "year", values_to = "lifeExp")
+
+View(long_data)
+################################################################################
+
+################################################################################
+# Describe
+View(msleep)
+
+# Range / spread
+min(msleep$awake)
+max(msleep$awake)
+range(msleep$awake)
+IQR(msleep$awake)
+
+# Centrality
+mean(msleep$awake)
+median(msleep$awake)
+
+# Variance
+var(msleep$awake)
+
+# Provide data of minimum value, first quartile, median, mean, third quartile and maximum value.
+summary(msleep$awake)
+
+# Selects multiple variables to do summary.
+msleep %>%
+  select(awake, sleep_total) %>%
+  summary()
+
+# Customize your own summary
+msleep %>%
+  drop_na(vore) %>%
+  group_by(vore) %>%
+  summarise(Lower = min(sleep_total), 
+            Average = mean(sleep_total), 
+            Upper = max(sleep_total),
+            Difference = max(sleep_total - min(sleep_total))) %>%
+  arrange(Average) %>%
+  View()
+
+################################################################################
